@@ -1,38 +1,32 @@
-import * as React from "react"
-import {
-  ChakraProvider,
-  Box,
-  Text,
-  Link,
-  VStack,
-  Code,
-  Grid,
-  theme,
-} from "@chakra-ui/react"
-import { ColorModeSwitcher } from "./ColorModeSwitcher"
-import { Logo } from "./Logo"
+import React from "react";
+import Spreadsheet from "./components/Spreadsheet";
+import { SpreadsheetInitializer } from "./spreadsheet/types";
 
-export const App = () => (
-  <ChakraProvider theme={theme}>
-    <Box textAlign="center" fontSize="xl">
-      <Grid minH="100vh" p={3}>
-        <ColorModeSwitcher justifySelf="flex-end" />
-        <VStack spacing={8}>
-          <Logo h="40vmin" pointerEvents="none" />
-          <Text>
-            Edit <Code fontSize="xl">src/App.tsx</Code> and save to reload.
-          </Text>
-          <Link
-            color="teal.500"
-            href="https://chakra-ui.com"
-            fontSize="2xl"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn Chakra
-          </Link>
-        </VStack>
-      </Grid>
-    </Box>
-  </ChakraProvider>
-)
+const loadSpreadsheet = (): SpreadsheetInitializer | null => {
+  const path = window.location.pathname;
+  if (path.length > 1) {
+    const id = path.substring(1);
+    const localStorageValue = localStorage.getItem(id);
+    if (localStorageValue) {
+      try {
+        const { matrix } = JSON.parse(localStorageValue);
+        if (matrix.length > 0 && matrix[0].length > 0) {
+          return { id, matrix };
+        }
+      } catch {}
+    }
+  }
+  return null;
+};
+
+function App() {
+  const spreadsheet = loadSpreadsheet();
+
+  return spreadsheet ? (
+    <Spreadsheet {...spreadsheet} />
+  ) : (
+    <Spreadsheet rows={100} cols={30} />
+  );
+}
+
+export default App;
